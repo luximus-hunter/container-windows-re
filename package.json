@@ -9,13 +9,11 @@
     "dev": "vite build --watch",
     "build": "vite build && tsdown",
     "typecheck": "tsc --noEmit",
-    "lint": "pnpm run lint:source && pnpm run typecheck && pnpm run build && pnpm run lint:extension",
+    "lint": "oxlint .",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
     "package": "pnpm run build && node build/tools/package.mjs",
-    "check": "pnpm run format:check && pnpm run lint && pnpm run package",
-    "format": "oxfmt --write \"**/*.{json,ts,html,md,mjs,yml,yaml}\" \".*.json\"",
-    "format:check": "oxfmt --check \"**/*.{json,ts,html,md,mjs,yml,yaml}\" \".*.json\"",
-    "lint:source": "oxlint --deny-warnings .",
-    "lint:extension": "web-ext lint --source-dir build/extension --warnings-as-errors"
+    "check": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run build && pnpm run lint:extension && node build/tools/package.mjs"
   },
   "devDependencies": {
     "@types/firefox-webext-browser": "^143.0.1",

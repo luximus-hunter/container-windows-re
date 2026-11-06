@@ -114,16 +114,16 @@ Application code, build configuration and the packaging tool use strict TypeScri
 
 ### Commands
 
-| Command                 | Action                                                  |
-| ----------------------- | ------------------------------------------------------- |
-| `pnpm run dev`          | Watch and rebuild extension assets                      |
-| `pnpm run build`        | Build the extension and packaging tool                  |
-| `pnpm run format`       | Apply Oxfmt formatting                                  |
-| `pnpm run format:check` | Check formatting without rewriting files                |
-| `pnpm run typecheck`    | Check TypeScript types                                  |
-| `pnpm run lint`         | Run Oxlint, type checking, build and Firefox validation |
-| `pnpm run package`      | Build and create the unsigned ZIP and checksum          |
-| `pnpm run check`        | Run formatting checks, lint and packaging               |
+| Command                 | Action                                                        |
+| ----------------------- | ------------------------------------------------------------- |
+| `pnpm run dev`          | Watch and rebuild extension assets                            |
+| `pnpm run build`        | Build the extension and packaging tool                        |
+| `pnpm run format`       | Apply Oxfmt formatting                                        |
+| `pnpm run format:check` | Check formatting without rewriting files                      |
+| `pnpm run typecheck`    | Check TypeScript types                                        |
+| `pnpm run lint`         | Lint source with Oxlint                                       |
+| `pnpm run package`      | Build and create the unsigned ZIP and checksum                |
+| `pnpm run check`        | Check formatting, lint and types; build, validate and package |
 
 During development, keep `pnpm run dev` running and reload the temporary extension from Firefox's debugging page after changes. The extension uses local built assets; no development server is required. Changes to copied static assets or build configuration may require restarting the watcher or running `pnpm run build`.
 

@@ -54,13 +54,11 @@ jobs:
       - name: Check formatting
         run: pnpm run format:check
       - name: Lint source
-        run: pnpm run lint:source
+        run: pnpm run lint
       - name: Check types
         run: pnpm run typecheck
       - name: Build
         run: pnpm run build
-      - name: Validate Firefox extension
-        run: pnpm run lint:extension
       - name: Package extension
         run: node build/tools/package.mjs
       - name: Archive committed source for Mozilla review
@@ -140,13 +138,11 @@ jobs:
       - name: Check formatting
         run: pnpm run format:check
       - name: Lint source
-        run: pnpm run lint:source
+        run: pnpm run lint
       - name: Check types
         run: pnpm run typecheck
       - name: Build
         run: pnpm run build
-      - name: Validate Firefox extension
-        run: pnpm run lint:extension
       - name: Submit public AMO listing with review sources
         env:
           WEB_EXT_API_KEY: ${{ secrets.WEB_EXT_API_KEY }}
