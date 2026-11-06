@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Container Windows RE — Settings</title>
+    <link rel="icon" type="image/svg+xml" href="app-window.svg" />
+    <script type="module" src="options.ts"></script>
+    <style>
+      body {
+        font:
+          16px/1.6 system-ui,
+          sans-serif;
+        max-width: 840px;
+        margin: 32px auto;
+        padding: 0 24px;
+      }
+      h1,
+      h2 {
+        line-height: 1.2;
+      }
+      section {
+        margin: 28px 0;
+      }
+      button {
+        font: inherit;
+        padding: 8px 14px;
+        cursor: pointer;
+      }
+      button:disabled {
+        cursor: default;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      #container-settings {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px;
+      }
+      #container-settings label {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border: 1px solid GrayText;
+        border-radius: 8px;
+        padding: 12px;
+      }
+      #container-settings label div {
+        width: 28px;
+        height: 28px;
+        mask-size: contain;
+        mask-repeat: no-repeat;
+        flex-shrink: 0;
+      }
+      #container-settings label span {
+        flex: 1;
+      }
+      input {
+        width: 20px;
+        height: 20px;
+      }
+      #result,
+      #diagnostics {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+      [hidden] {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Container Windows RE</h1>
+    <p id="version"></p>
+    <section aria-labelledby="access-heading">
+      <h2 id="access-heading">Website access</h2>
+      <p id="permission-status" role="status">Checking website access…</p>
+      <button id="access" type="button">Allow website access</button>
+      <p>
+        Firefox will ask for HTTP/HTTPS website access. Detection checks only the page's display
+        mode and loading state; it does not read or transmit page content. Detected app windows are
+        excluded. An app whose mode cannot be read may still participate in grouping.
+      </p>
+    </section>
+    <section aria-labelledby="grouping-heading">
+      <h2 id="grouping-heading">Grouping</h2>
+      <p id="status" role="status">Checking grouping state…</p>
+      <div class="actions">
+        <button id="automatic" type="button" disabled>Automatic grouping</button>
+        <button id="pause" type="button" disabled>Pause grouping in this window</button>
+        <button id="group-existing" type="button" disabled>Group existing tabs now</button>
+      </div>
+      <p>
+        New enabled-container tabs group in regular or unknown windows. Initial tabs of newly opened
+        windows stay in place to protect app launches. Grouping these explicitly requires a
+        regular-browser display-mode signal.
+      </p>
+      <p id="result" role="status" aria-live="polite"></p>
+    </section>
+    <h2>Containers</h2>
+    <p id="containers"></p>
+    <p>
+      Choose which containers group automatically. Default-container tabs stay in place. Changing
+      these choices does not rearrange existing tabs.
+    </p>
+    <section id="container-settings" aria-label="Container preferences"></section>
+    <div class="actions">
+      <button id="select" type="button">Select all</button>
+      <button id="deselect" type="button">Deselect all</button>
+      <button id="initialize" type="button">Enable all containers</button>
+    </div>
+    <details>
+      <summary>Diagnostics</summary>
+      <pre id="diagnostics"></pre>
+    </details>
+    <template
+      ><label
+        ><div aria-hidden="true"></div>
+        <span></span><input type="checkbox" aria-label="Group this container" /></label
+    ></template>
+  </body>
+</html>

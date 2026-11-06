@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Container Windows RE",
+  "version": "1.0.0",
+  "author": "Thomas Lipman",
+  "description": "Group container tabs in regular and unknown windows, excluding positively detected app windows.",
+  "icons": {
+    "48": "app-window.svg",
+    "96": "app-window.svg"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "data_collection_permissions": {
+        "required": ["none"]
+      },
+      "id": "{572d2b62-7dda-4e5e-b71f-e6480f4bd5cd}",
+      "strict_min_version": "148.0"
+    }
+  },
+  "incognito": "not_allowed",
+  "background": {
+    "scripts": ["background.js"],
+    "type": "module"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  },
+  "permissions": ["contextualIdentities", "sessions", "storage", "scripting"],
+  "host_permissions": ["http://*/*", "https://*/*"]
+}
