@@ -29,11 +29,6 @@ export const getImages = () =>
     }),
   );
 
-export const getWindows = () =>
-  browser.windows
-    .getAll({ populate: true, windowTypes: ["normal"] })
-    .then((array) => Object.freeze(array));
-
 export const setStorage = async (key: string, value = initial) => {
   if (typeof key !== "string") {
     throw new TypeError("setStorage: key");

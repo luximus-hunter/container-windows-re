@@ -23,11 +23,10 @@ if (files.some((file) => file.startsWith("META-INF/"))) {
   throw new Error("Original signatures must not ship");
 }
 const entries: Zippable = {};
-for (const file of [...files].sort()) {
-  entries[file] = [
-    new Uint8Array(await readFile(new URL(file, target))),
-    { mtime: new Date(2020, 0, 1), os: 0, attrs: 0 },
-  ];
+const sortedFiles = files.sort();
+const contents = await Promise.all(sortedFiles.map((file) => readFile(new URL(file, target))));
+for (let index = 0; index < sortedFiles.length; ++index) {
+  entries[sortedFiles[index]] = [contents[index], { mtime: new Date(2020, 0, 1), os: 0, attrs: 0 }];
 }
 const bytes = zipSync(entries, { level: 9 });
 const output = new URL("../../dist/", target);

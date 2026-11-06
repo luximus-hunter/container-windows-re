@@ -14,7 +14,11 @@ export function readDisplayMode() {
   return window.matchMedia("(display-mode: browser)").matches ? "browser" : "unknown";
 }
 
-export async function detectTab(api: RouterApi, tab: Tab, timeoutMs = 1500) {
+export async function detectTab(
+  api: RouterApi,
+  tab: Pick<Tab, "id" | "windowId">,
+  timeoutMs = 1500,
+) {
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
     const result = await Promise.race([
@@ -52,7 +56,9 @@ export async function detectWindow(api: RouterApi, windowInfo: WindowInfo, timeo
   }
   // Query every available top-level document. Any positive app signal wins.
   const results = await Promise.all(
-    windowInfo.tabs.map((tab) => detectTab(api, { ...tab, windowId: windowInfo.id }, timeoutMs)),
+    windowInfo.tabs.map((tab) =>
+      detectTab(api, { id: tab.id, windowId: windowInfo.id }, timeoutMs),
+    ),
   );
   if (results.includes("app")) {
     return "app";

@@ -13,7 +13,8 @@
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
     "package": "pnpm run build && node build/tools/package.mjs",
-    "check": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run build && pnpm run lint:extension && node build/tools/package.mjs"
+    "check": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run build && pnpm run lint:extension && node build/tools/package.mjs",
+    "lint:extension": "web-ext lint --source-dir build/extension --warnings-as-errors"
   },
   "devDependencies": {
     "@types/firefox-webext-browser": "^143.0.1",

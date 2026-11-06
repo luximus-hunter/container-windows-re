@@ -4,7 +4,8 @@ import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 
 const source = (file: string) => fileURLToPath(new URL(`./src/${file}`, import.meta.url));
-const output = fileURLToPath(new URL("./build/extension/", import.meta.url));
+const outputUrl = new URL("./build/extension/", import.meta.url);
+const output = fileURLToPath(outputUrl);
 
 export default defineConfig({
   root: source(""),
@@ -20,20 +21,14 @@ export default defineConfig({
         ) {
           throw new Error("Unexpected fork identity");
         }
-        for (const file of ["manifest.json", "app-window.svg"]) {
-          await copyFile(
-            source(file),
-            new URL(file, new URL("./build/extension/", import.meta.url)),
-          );
-        }
-        await copyFile(
-          new URL("./LICENCE", import.meta.url),
-          new URL("./build/extension/LICENCE", import.meta.url),
-        );
-        await copyFile(
-          new URL("./LUCIDE-LICENSE", import.meta.url),
-          new URL("./build/extension/LUCIDE-LICENSE", import.meta.url),
-        );
+        await Promise.all([
+          ...["manifest.json", "app-window.svg"].map((file) =>
+            copyFile(source(file), new URL(file, outputUrl)),
+          ),
+          ...["LICENCE", "LUCIDE-LICENSE"].map((file) =>
+            copyFile(new URL(`./${file}`, import.meta.url), new URL(file, outputUrl)),
+          ),
+        ]);
         const files = await readdir(output);
         if (files.includes("META-INF")) {
           throw new Error("Original signatures must not ship");

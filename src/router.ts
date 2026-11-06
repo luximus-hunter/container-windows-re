@@ -11,9 +11,30 @@ const compatible = (window: WindowInfo) => window.type === "normal" && !window.i
 // untouched themselves, but no longer make a compatible grouping destination.
 const mixed = (window: WindowInfo, tab: Tab) =>
   window.tabs.some((t) => t.id !== tab.id && t.cookieStoreId !== tab.cookieStoreId);
-const sameTabs = (before: WindowInfo, after: WindowInfo) =>
-  before.tabs.length === after.tabs.length &&
-  before.tabs.every((tab) => after.tabs.some((current) => current.id === tab.id));
+const sameTabs = (before: WindowInfo, after: WindowInfo) => {
+  if (before.tabs.length !== after.tabs.length) {
+    return false;
+  }
+  // Most fresh snapshots keep tab order, so compare without allocating first.
+  let index = 0;
+  while (index < before.tabs.length && before.tabs[index].id === after.tabs[index].id) {
+    ++index;
+  }
+  if (index === before.tabs.length) {
+    return true;
+  }
+  // A reorder is allowed: validate membership without a quadratic nested scan.
+  const ids = new Set<number>();
+  for (const tab of after.tabs) {
+    ids.add(tab.id);
+  }
+  for (; index < before.tabs.length; ++index) {
+    if (!ids.has(before.tabs[index].id)) {
+      return false;
+    }
+  }
+  return true;
+};
 
 export function chooseDestination(
   windows: WindowInfo[],
@@ -21,18 +42,35 @@ export function chooseDestination(
   eligible: Set<number>,
   homes: Map<string, number>,
 ) {
-  return windows
-    .filter((w) => compatible(w) && eligible.has(w.id) && !mixed(w, tab))
-    .map((w) => ({
-      id: w.id,
-      count: w.tabs.filter((t) => t.id !== tab.id && t.cookieStoreId === tab.cookieStoreId).length,
-    }))
-    .filter((w) => w.count > 0 || w.id === tab.windowId)
-    .sort(
-      (a, b) =>
-        Number(b.id === homes.get(tab.cookieStoreId ?? "")) -
-          Number(a.id === homes.get(tab.cookieStoreId ?? "")) || a.id - b.id,
-    )[0]?.id;
+  const home = homes.get(tab.cookieStoreId ?? "");
+  let destination: number | undefined;
+  for (const window of windows) {
+    if (!compatible(window) || !eligible.has(window.id)) {
+      continue;
+    }
+    let hasCompanion = false;
+    let hasOtherContainer = false;
+    for (const current of window.tabs) {
+      if (current.id === tab.id) {
+        continue;
+      }
+      if (current.cookieStoreId !== tab.cookieStoreId) {
+        hasOtherContainer = true;
+        break;
+      }
+      hasCompanion = true;
+    }
+    if (hasOtherContainer || (!hasCompanion && window.id !== tab.windowId)) {
+      continue;
+    }
+    if (window.id === home) {
+      return home;
+    }
+    if (destination === undefined || window.id < destination) {
+      destination = window.id;
+    }
+  }
+  return destination;
 }
 
 export function createRouter(api: RouterApi, report = console.error) {
@@ -349,10 +387,7 @@ export function createRouter(api: RouterApi, report = console.error) {
       await remember(tab.cookieStoreId, source.id);
       return decision(item, "skipped", "Already in its dedicated container window");
     }
-    if (
-      destinationId === undefined &&
-      !source.tabs.some((t) => t.id !== tab.id && t.cookieStoreId !== tab.cookieStoreId)
-    ) {
+    if (destinationId === undefined && !mixed(source, tab)) {
       pending.delete(item.id);
       return decision(item, "skipped", "Already in a dedicated container window");
     }
@@ -427,12 +462,7 @@ export function createRouter(api: RouterApi, report = console.error) {
       pending.delete(item.id);
       return decision(item, "skipped", "Source is now a dedicated container window");
     }
-    if (
-      !destination &&
-      !finalSource.tabs.some(
-        (t) => t.id !== current.id && t.cookieStoreId !== current.cookieStoreId,
-      )
-    ) {
+    if (!destination && !mixed(finalSource, current)) {
       pending.delete(item.id);
       return decision(item, "skipped", "Source is now a dedicated container window");
     }
@@ -440,7 +470,15 @@ export function createRouter(api: RouterApi, report = console.error) {
     // enqueue another move. A rejection is caught by the queue, never retried.
     pending.delete(item.id);
     if (destination) {
-      const index = current.pinned ? finalDestination!.tabs.filter((t) => t.pinned).length : -1;
+      let index = -1;
+      if (current.pinned) {
+        index = 0;
+        for (const tab of finalDestination!.tabs) {
+          if (tab.pinned) {
+            ++index;
+          }
+        }
+      }
       await api.tabs.move(current.id, { windowId: destination.id, index });
       await safe(remember(current.cookieStoreId!, destination.id));
       return decision(item, "moved", "Moved to container window", {
@@ -533,16 +571,16 @@ export function createRouter(api: RouterApi, report = console.error) {
       }
       await ensureContainerDefaults();
       const windows = await api.windows.getAll({ populate: true });
-      const items = windows
-        .filter((window) => compatible(window) && allowed(window.id))
-        .flatMap((window) =>
-          window.tabs.map((tab) => ({
-            ...tab,
-            explicit: true,
-            revision: requestedRevisions.get(window.id) || 0,
-            globalRevision: requestedGlobal,
-          })),
-        );
+      const items: PendingTab[] = [];
+      for (const window of windows) {
+        if (!compatible(window) || !allowed(window.id)) {
+          continue;
+        }
+        const revision = requestedRevisions.get(window.id) || 0;
+        for (const tab of window.tabs) {
+          items.push({ ...tab, explicit: true, revision, globalRevision: requestedGlobal });
+        }
+      }
       for (const item of items) {
         // Explicit button press authorizes this snapshot only.
         // Each tab still gets current source/app/pause checks.

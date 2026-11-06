@@ -112,6 +112,13 @@ Application code, build configuration and the packaging tool use strict TypeScri
 | [Oxfmt](https://oxc.rs/docs/guide/usage/formatter/quickstart) | Format source, configuration, HTML and documentation |
 | web-ext                                                       | Validate the generated Firefox extension             |
 
+All nine direct dependencies remain in use: Vite builds the extension; tsdown builds
+the packaging tool; fflate creates deterministic ZIPs; TypeScript and the Node/Firefox
+type packages provide static checking; Oxlint and Oxfmt check source; web-ext validates
+and submits the extension to Mozilla. They are development dependencies and are not
+shipped as extension runtime packages. Rolldown and Oxc are supplied through the
+build tools, so separate direct dependencies are unnecessary.
+
 ### Commands
 
 | Command                 | Action                                                        |

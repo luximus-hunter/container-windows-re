@@ -9,6 +9,9 @@ const automatic = element("automatic");
 const pause = element("pause");
 const existing = element("group-existing");
 const result = element("result");
+const permissionStatus = element("permission-status");
+const containers = element("containers");
+const diagnostics = element("diagnostics");
 const version = browser.runtime.getManifest().version;
 element("version").textContent = `Version ${version}`;
 let windowId: number;
@@ -44,7 +47,7 @@ async function refresh() {
           : "inactive in this window"
   }.`;
   access.hidden = state.access;
-  element("permission-status").textContent = state.access
+  permissionStatus.textContent = state.access
     ? "Website access granted. App-mode detection is available on accessible websites."
     : "Allow website access so Container Windows RE can detect app windows. Unknown windows still participate in grouping.";
   automatic.textContent = state.automatic
@@ -55,9 +58,14 @@ async function refresh() {
     : "Pause grouping in this window";
   pause.disabled = !state.automatic;
   existing.disabled = !state.automatic;
-  const enabled = state.containers.filter((container) => container.enabled);
-  element("containers").textContent = enabled.length
-    ? `Enabled containers: ${enabled.length} of ${state.containers.length}`
+  let enabled = 0;
+  for (const container of state.containers) {
+    if (container.enabled) {
+      ++enabled;
+    }
+  }
+  containers.textContent = enabled
+    ? `Enabled containers: ${enabled} of ${state.containers.length}`
     : "No containers enabled. Select containers below.";
   result.textContent = [
     renderResult(state.lastBatch),
@@ -69,7 +77,7 @@ async function refresh() {
   ]
     .filter(Boolean)
     .join("\n");
-  element("diagnostics").textContent = JSON.stringify(
+  diagnostics.textContent = JSON.stringify(
     {
       version,
       windowId,
