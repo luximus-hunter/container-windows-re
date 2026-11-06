@@ -217,7 +217,7 @@ under the [ISC licence](LUCIDE-LICENSE). Its SVG is stored locally in
 
 The workflow in `.github/workflows/release.yml` runs on pushes, pull requests and manual dispatch. It installs locked dependencies, runs `pnpm run check`, and uploads a build artifact containing the unsigned extension ZIP, a ZIP of the committed source and both SHA-256 checksums.
 
-A version tag such as `v1.0.0` also creates a public GitHub release with those files. Package and manifest versions must agree; the pnpm lockfile must be up to date, and the tag must be `v` followed by that version. GitHub's automatically provided `GITHUB_TOKEN` publishes release assets; no personal access token is needed for the workflow.
+A version tag such as `v1.0.0` also creates a public GitHub release with only the built extension ZIP and its SHA-256 checksum. The source archive stays in the workflow artifact for Mozilla review and is not uploaded as a release asset. GitHub also provides its own automatic source-code archive links. Package and manifest versions must agree; the pnpm lockfile must be up to date, and the tag must be `v` followed by that version. GitHub's automatically provided `GITHUB_TOKEN` publishes release assets; no personal access token is needed for the workflow.
 
 ### One-time repository setup
 
