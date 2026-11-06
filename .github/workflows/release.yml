@@ -27,10 +27,14 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
+      - uses: pnpm/action-setup@f53f5227a9e83886ab598c617f3c170fab62f0d3 # v6
+        with:
+          run_install: false
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "22.23.2"
-          cache: npm
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
       - name: Check version consistency
         env:
           RELEASE_TAG: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
@@ -39,17 +43,26 @@ jobs:
           import {readFileSync} from 'node:fs';
           const read = path => JSON.parse(readFileSync(path, 'utf8'));
           const version = read('package.json').version;
-          if (read('src/manifest.json').version !== version ||
-              read('package-lock.json').version !== version ||
-              read('package-lock.json').packages[''].version !== version) {
-            throw new Error('Manifest, package and lockfile versions must match');
+          if (read('src/manifest.json').version !== version) {
+            throw new Error('Manifest and package versions must match');
           }
           if (process.env.RELEASE_TAG && process.env.RELEASE_TAG !== `v${version}`) {
             throw new Error(`Tag must be v${version}`);
           }
           JS
-      - run: npm ci
-      - run: npm run check
+      - run: pnpm install --frozen-lockfile
+      - name: Check formatting
+        run: pnpm run format:check
+      - name: Lint source
+        run: pnpm run lint:source
+      - name: Check types
+        run: pnpm run typecheck
+      - name: Build
+        run: pnpm run build
+      - name: Validate Firefox extension
+        run: pnpm run lint:extension
+      - name: Package extension
+        run: node build/tools/package.mjs
       - name: Archive committed source for Mozilla review
         run: |
           version=$(node -p "JSON.parse(require('fs').readFileSync('package.json')).version")
@@ -82,14 +95,14 @@ jobs:
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
           cat > "$RUNNER_TEMP/release-notes.md" <<'NOTES'
-          Container Windows RE â€” Firefox container-tab grouping.
+          Container Windows RE: Firefox container-tab grouping.
 
           Assets include the unsigned extension ZIP, source ZIP and SHA-256 checksums.
           The unsigned ZIP is for AMO submission or temporary loading; release Firefox
           needs the Mozilla-signed extension. AMO submission and approval are tracked
           separately from this GitHub release.
 
-          To build from source: use Node.js 22.23.2, then run npm ci and npm run check.
+          To build from source: use Node.js 22.23.2, then run pnpm install --frozen-lockfile and pnpm run check.
           NOTES
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             gh release upload "$RELEASE_TAG" dist/* --clobber
@@ -111,16 +124,29 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
+      - uses: pnpm/action-setup@f53f5227a9e83886ab598c617f3c170fab62f0d3 # v6
+        with:
+          run_install: false
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "22.23.2"
-          cache: npm
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: container-windows-re-${{ github.sha }}
           path: dist
-      - run: npm ci
-      - run: npm run build
+      - run: pnpm install --frozen-lockfile
+      - name: Check formatting
+        run: pnpm run format:check
+      - name: Lint source
+        run: pnpm run lint:source
+      - name: Check types
+        run: pnpm run typecheck
+      - name: Build
+        run: pnpm run build
+      - name: Validate Firefox extension
+        run: pnpm run lint:extension
       - name: Submit public AMO listing with review sources
         env:
           WEB_EXT_API_KEY: ${{ secrets.WEB_EXT_API_KEY }}
@@ -131,7 +157,7 @@ jobs:
             exit 1
           fi
           version=$(node -p "JSON.parse(require('fs').readFileSync('package.json')).version")
-          npx --no-install web-ext sign \
+          pnpm exec web-ext sign \
             --source-dir build/extension \
             --channel listed \
             --amo-metadata amo-metadata.json \

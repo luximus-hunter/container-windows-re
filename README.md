@@ -11,11 +11,13 @@ Container Windows RE is based on **Container Windows 1.3 by JM**. The MIT licenc
 
 ## Get started
 
-Build the extension with Node.js **22.18+** and npm:
+Build the extension with Node.js **22.18+** and pnpm **12.18.0**:
 
 ```sh
-npm ci
-npm run check
+corepack enable
+corepack install
+pnpm install --frozen-lockfile
+pnpm run check
 ```
 
 In Firefox:
@@ -112,21 +114,21 @@ Application code, build configuration and the packaging tool use strict TypeScri
 
 ### Commands
 
-| Command                | Action                                                  |
-| ---------------------- | ------------------------------------------------------- |
-| `npm run dev`          | Watch and rebuild extension assets                      |
-| `npm run build`        | Build the extension and packaging tool                  |
-| `npm run format`       | Apply Oxfmt formatting                                  |
-| `npm run format:check` | Check formatting without rewriting files                |
-| `npm run typecheck`    | Check TypeScript types                                  |
-| `npm run lint`         | Run Oxlint, type checking, build and Firefox validation |
-| `npm run package`      | Build and create the unsigned ZIP and checksum          |
-| `npm run check`        | Run formatting checks, lint and packaging               |
+| Command                 | Action                                                  |
+| ----------------------- | ------------------------------------------------------- |
+| `pnpm run dev`          | Watch and rebuild extension assets                      |
+| `pnpm run build`        | Build the extension and packaging tool                  |
+| `pnpm run format`       | Apply Oxfmt formatting                                  |
+| `pnpm run format:check` | Check formatting without rewriting files                |
+| `pnpm run typecheck`    | Check TypeScript types                                  |
+| `pnpm run lint`         | Run Oxlint, type checking, build and Firefox validation |
+| `pnpm run package`      | Build and create the unsigned ZIP and checksum          |
+| `pnpm run check`        | Run formatting checks, lint and packaging               |
 
-During development, keep `npm run dev` running and reload the temporary extension from Firefox's debugging page after changes. The extension uses local built assets; no development server is required. Changes to copied static assets or build configuration may require restarting the watcher or running `npm run build`.
+During development, keep `pnpm run dev` running and reload the temporary extension from Firefox's debugging page after changes. The extension uses local built assets; no development server is required. Changes to copied static assets or build configuration may require restarting the watcher or running `pnpm run build`.
 
 Oxfmt covers all project JSON, TypeScript, HTML and Markdown files, including hidden JSON
-configuration files. The npm-generated lockfile is automatically
+configuration files. The pnpm-generated lockfile is automatically
 excluded by Oxfmt. Settings live in `.oxfmtrc.json`; generated output, dependencies and original signatures are excluded. Oxlint settings live in `.oxlintrc.json`.
 
 ### Project layout
@@ -158,7 +160,7 @@ dist/                  Unsigned ZIP and checksum
 
 Disable the original **Container Windows** in `about:addons` while using this extension. After building, load `build/extension/manifest.json` from **Load Temporary Add-on** in `about:debugging#/runtime/this-firefox`.
 
-To update a temporary installation, run `npm ci` and `npm run check`, then click **Reload** beside **Container Windows RE** in `about:debugging`. If the temporary entry disappeared, load the generated manifest again. Confirm the name and version on the settings page. Existing preferences are retained under the same extension ID; previously disabled automatic grouping or containers remain disabled. Existing tabs stay in place unless you select **Group existing tabs now**.
+To update a temporary installation, run `pnpm install --frozen-lockfile` and `pnpm run check`, then click **Reload** beside **Container Windows RE** in `about:debugging`. If the temporary entry disappeared, load the generated manifest again. Confirm the name and version on the settings page. Existing preferences are retained under the same extension ID; previously disabled automatic grouping or containers remain disabled. Existing tabs stay in place unless you select **Group existing tabs now**.
 
 Per-window pauses may clear on reload and clear on a full browser restart. Global grouping and container choices persist. A full restart also clears remembered window IDs; startup baselining prevents restored tabs from being regrouped automatically.
 
@@ -166,15 +168,15 @@ Per-window pauses may clear on reload and clear on a full browser restart. Globa
 
 Release Firefox requires a signed extension. Keep signature enforcement enabled.
 
-1. Build with `npm ci` and `npm run check`, and verify behavior in a disposable Firefox profile.
+1. Build with `pnpm install --frozen-lockfile` and `pnpm run check`, and verify behavior in a disposable Firefox profile.
 2. Sign in to the [AMO Developer Hub](https://addons.mozilla.org/developers/). For a public addons.mozilla.org listing, submit a new add-on and choose **On this site**. Use **On your own** only for self-distribution. If updating a previously submitted version of this fork, use that existing listing.
 3. Upload `dist/container-windows-re-1.0.0-unsigned.zip`. Keep the existing extension ID `{572d2b62-7dda-4e5e-b71f-e6480f4bd5cd}` for updates.
-4. If Mozilla requests source, provide `src/`, `scripts/`, build and formatter/linter configurations, `package.json`, `package-lock.json`, README and LICENCE. The TypeScript source is transformed and bundled; include the Node version and `npm ci` / `npm run build` instructions. Exclude `node_modules`, generated `build`/`dist` and original `META-INF` signatures.
+4. If Mozilla requests source, provide `src/`, `scripts/`, build and formatter/linter configurations, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, README and LICENCE. The TypeScript source is transformed and bundled; include the Node version and `pnpm install --frozen-lockfile` / `pnpm run build` instructions. Exclude `node_modules`, generated `build`/`dist` and original `META-INF` signatures.
 5. Address review requests and download the signed XPI. Local validation does not guarantee approval.
 6. Remove the temporary copy, then open `about:addons` → gear menu → **Install Add-on From File…** and select the signed XPI.
 7. Grant website access from the startup settings page if requested.
 
-For later releases, increment both `src/manifest.json` and `package.json` versions, run `npm install --package-lock-only` and `npm run check`, then submit the new ZIP to the same listing. Install the signed update from file. Automatic self-distribution updates are not configured.
+For later releases, increment both `src/manifest.json` and `package.json` versions, run `pnpm install --lockfile-only` and `pnpm run check`, then submit the new ZIP to the same listing. Install the signed update from file. Automatic self-distribution updates are not configured.
 
 See [Mozilla's signing and distribution guide](https://extensionworkshop.com/documentation/publish/signing-and-distribution-overview/) for the distribution process.
 
@@ -186,7 +188,7 @@ Remove a temporary installation through `about:debugging` or by exiting Firefox.
 
 ## Packaging and verification
 
-`npm run package` writes:
+`pnpm run package` writes:
 
 ```text
 dist/container-windows-re-1.0.0-unsigned.zip
@@ -206,9 +208,9 @@ under the [ISC licence](LUCIDE-LICENSE). Its SVG is stored locally in
 
 ## GitHub builds, releases and AMO publishing
 
-The workflow in `.github/workflows/release.yml` runs on pushes, pull requests and manual dispatch. It installs locked dependencies, runs `npm run check`, and uploads a build artifact containing the unsigned extension ZIP, a ZIP of the committed source and both SHA-256 checksums.
+The workflow in `.github/workflows/release.yml` runs on pushes, pull requests and manual dispatch. It installs locked dependencies, runs `pnpm run check`, and uploads a build artifact containing the unsigned extension ZIP, a ZIP of the committed source and both SHA-256 checksums.
 
-A version tag such as `v1.0.0` also creates a public GitHub release with those files. Package, lockfile and manifest versions must agree, and the tag must be `v` followed by that version. GitHub's automatically provided `GITHUB_TOKEN` publishes release assets; no personal access token is needed for the workflow.
+A version tag such as `v1.0.0` also creates a public GitHub release with those files. Package and manifest versions must agree; the pnpm lockfile must be up to date, and the tag must be `v` followed by that version. GitHub's automatically provided `GITHUB_TOKEN` publishes release assets; no personal access token is needed for the workflow.
 
 ### One-time repository setup
 

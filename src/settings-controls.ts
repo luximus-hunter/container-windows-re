@@ -30,10 +30,10 @@ async function refresh() {
   state = await browser.runtime.sendMessage({ type: "grouping-state", windowId });
   status.textContent = `Detected window: ${
     state.mode === "app"
-      ? "app — excluded"
+      ? "app: excluded"
       : state.mode === "browser"
         ? "regular browser"
-        : "unknown — treated as non-app"
+        : "unknown: treated as non-app"
   }. Grouping: ${
     !state.automatic
       ? "off everywhere"
