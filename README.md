@@ -4,7 +4,7 @@ A Firefox extension that groups container tabs into dedicated browsing windows w
 
 By **Thomas Lipman** · Package: `container-windows-re`
 
-Version **1.0.0** · Firefox **148+** · [MIT licence](LICENCE)
+Firefox **148+** · [MIT licence](LICENCE)
 
 Container Windows RE is based on **Container Windows 1.3 by JM**. The MIT licence credits Thomas Lipman for this version and retains the upstream copyright notice. The extension ID remains:
 `{572d2b62-7dda-4e5e-b71f-e6480f4bd5cd}`. Disable the original extension while using this fork so its separate router cannot interfere. Settings from the original extension are not imported.
@@ -180,13 +180,13 @@ Release Firefox requires a signed extension. Keep signature enforcement enabled.
 
 1. Build with `pnpm install --frozen-lockfile` and `pnpm run check`, and verify behavior in a disposable Firefox profile.
 2. Sign in to the [AMO Developer Hub](https://addons.mozilla.org/developers/). For a public addons.mozilla.org listing, submit a new add-on and choose **On this site**. Use **On your own** only for self-distribution. If updating a previously submitted version of this fork, use that existing listing.
-3. Upload `dist/container-windows-re-1.0.0-unsigned.zip`. Keep the existing extension ID `{572d2b62-7dda-4e5e-b71f-e6480f4bd5cd}` for updates.
+3. Upload the `container-windows-re-vX.X.X-unsigned.zip` release asset. Keep the existing extension ID `{572d2b62-7dda-4e5e-b71f-e6480f4bd5cd}` for updates.
 4. If Mozilla requests source, provide `src/`, `scripts/`, build and formatter/linter configurations, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, README and LICENCE. The TypeScript source is transformed and bundled; include the Node version and `pnpm install --frozen-lockfile` / `pnpm run build` instructions. Exclude `node_modules`, generated `build`/`dist` and original `META-INF` signatures.
 5. Address review requests and download the signed XPI. Local validation does not guarantee approval.
 6. Remove the temporary copy, then open `about:addons` → gear menu → **Install Add-on From File…** and select the signed XPI.
 7. Grant website access from the welcome tab to enable app window detection.
 
-For later releases, increment both `src/manifest.json` and `package.json` versions, run `pnpm install --lockfile-only` and `pnpm run check`, then submit the new ZIP to the same listing. Install the signed update from file. Automatic self-distribution updates are not configured.
+For later releases, push a new version tag and submit its ZIP to the same listing. Install the signed update from file. Automatic self-distribution updates are not configured.
 
 See [Mozilla's signing and distribution guide](https://extensionworkshop.com/documentation/publish/signing-and-distribution-overview/) for the distribution process.
 
@@ -201,8 +201,8 @@ Remove a temporary installation through `about:debugging` or by exiting Firefox.
 `pnpm run package` writes:
 
 ```text
-dist/container-windows-re-1.0.0-unsigned.zip
-dist/container-windows-re-1.0.0-unsigned.zip.sha256
+dist/container-windows-re-v1.0.0-unsigned.zip
+dist/container-windows-re-v1.0.0-unsigned.zip.sha256
 ```
 
 Vite cleans and regenerates `build/extension`, rewrites HTML references and copies the manifest, icon and licence. The packager archives only generated extension files with sorted paths and fixed timestamps. Build tools, TypeScript sources, dependencies and the extracted original `META-INF` signatures do not ship. The MIT licence credits Thomas Lipman and retains JM's upstream notice. The extension ID is unchanged so existing installations can update.
@@ -220,7 +220,7 @@ under the [ISC licence](LUCIDE-LICENSE). Its SVG is stored locally in
 
 The workflow in `.github/workflows/release.yml` runs on pushes, pull requests and manual dispatch. It installs locked dependencies, runs `pnpm run check`, and uploads a build artifact containing the unsigned extension ZIP, a ZIP of the committed source and both SHA-256 checksums.
 
-A version tag such as `v1.0.0` also creates a public GitHub release with only the built extension ZIP and its SHA-256 checksum. The source archive stays in the workflow artifact for Mozilla review and is not uploaded as a release asset. GitHub also provides its own automatic source-code archive links. Package and manifest versions must agree; the pnpm lockfile must be up to date, and the tag must be `v` followed by that version. GitHub's automatically provided `GITHUB_TOKEN` publishes release assets; no personal access token is needed for the workflow.
+A tag such as `v12.34.567` sets the build's package and manifest version to `12.34.567` and creates a public GitHub release with `container-windows-re-v12.34.567-unsigned.zip` and its SHA-256 checksum. The source archive uses the same tag in its filename and includes the versioned manifests so Mozilla can rebuild it. GitHub's automatically provided `GITHUB_TOKEN` publishes the release assets.
 
 ### One-time repository setup
 
@@ -236,14 +236,16 @@ A version tag such as `v1.0.0` also creates a public GitHub release with only th
 
 [GitHub secrets documentation](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets) and [Mozilla's submission options](https://extensionworkshop.com/documentation/develop/web-ext-command-reference/#web-ext-sign) describe the underlying services.
 
-### Publish version 1.0.0
+### Publish a new version
 
-After committing the project and pushing the default branch:
+Commit and push the code to release, then tag that commit. Use a lowercase `v` followed by exactly three dot-separated groups of digits.
 
 ```sh
-git tag v1.0.0
-git push origin v1.0.0
+git tag v12.34.567
+git push origin v12.34.567
 ```
+
+For AMO submissions, each version component must have at most nine digits and no leading zeros unless the component is zero. [Firefox manifest version format](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/version)
 
 Watch **Actions → Build and release**. The `build` job validates and archives the project; `github-release` publishes the downloadable assets. The independent `amo` job submits to the public **listed** channel only when `AMO_PUBLISH=true`. Fork pull requests and branch builds never receive the publishing secrets.
 
@@ -251,4 +253,4 @@ If the tag was published before AMO was configured, open **Actions → Build and
 
 AMO signing/review is separate from the GitHub release. A successful upload does not guarantee Mozilla approval or immediate public availability. The listed submission may remain under review beyond the workflow's wait period; check the Developer Hub before taking further action. The GitHub ZIP remains unsigned; obtain the signed extension from Mozilla. Screenshots, listing details and reviewer follow-up may still need attention in the Developer Hub.
 
-For later releases, bump `src/manifest.json` and `package.json`, refresh the lockfile, commit and push, then tag the new version. Never reuse a published version tag for different code.
+Never reuse a published version tag for different code.

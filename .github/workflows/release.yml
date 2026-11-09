@@ -3,7 +3,7 @@ name: Build and release
 on:
   push:
     branches: ["**"]
-    tags: ["v*"]
+    tags: ["**"]
   pull_request:
   workflow_dispatch:
     inputs:
@@ -35,22 +35,31 @@ jobs:
           node-version: "22.23.2"
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-      - name: Check version consistency
+      - name: Set build version
         env:
           RELEASE_TAG: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
         run: |
           node --input-type=module <<'JS'
-          import {readFileSync} from 'node:fs';
+          import {readFileSync, writeFileSync} from 'node:fs';
           const read = path => JSON.parse(readFileSync(path, 'utf8'));
-          const version = read('package.json').version;
-          if (read('src/manifest.json').version !== version) {
-            throw new Error('Manifest and package versions must match');
-          }
-          if (process.env.RELEASE_TAG && process.env.RELEASE_TAG !== `v${version}`) {
-            throw new Error(`Tag must be v${version}`);
+          const tag = process.env.RELEASE_TAG;
+          const files = ['package.json', 'src/manifest.json'];
+          if (tag) {
+            if (!/^v[0-9]+\.[0-9]+\.[0-9]+$/.test(tag)) {
+              throw new Error(`Invalid release tag "${tag}". Use vX.X.X, for example v12.34.567.`);
+            }
+            const version = tag.slice(1);
+            for (const file of files) {
+              writeFileSync(file, JSON.stringify({ ...read(file), version }, null, 2) + '\n');
+            }
+          } else if (read(files[0]).version !== read(files[1]).version) {
+            throw new Error('Manifest and package versions must match for untagged builds');
           }
           JS
       - run: pnpm install --frozen-lockfile
+      - name: Format versioned metadata
+        if: github.ref_type == 'tag'
+        run: pnpm exec oxfmt --write package.json src/manifest.json
       - name: Check formatting
         run: pnpm run format:check
       - name: Lint source
@@ -61,11 +70,18 @@ jobs:
         run: pnpm run build
       - name: Package extension
         run: node build/tools/package.mjs
-      - name: Archive committed source for Mozilla review
+      - name: Archive release source for Mozilla review
+        env:
+          RELEASE_TAG: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
         run: |
           version=$(node -p "JSON.parse(require('fs').readFileSync('package.json')).version")
-          source="dist/container-windows-re-${version}-source.zip"
-          git archive --format=zip --output="$source" HEAD
+          source="dist/container-windows-re-v${version}-source.zip"
+          source_tree=HEAD
+          if [ -n "$RELEASE_TAG" ]; then
+            git add -- package.json src/manifest.json
+            source_tree=$(git write-tree)
+          fi
+          git archive --format=zip --output="$source" "$source_tree"
           (cd dist && sha256sum "$(basename "$source")" > "$(basename "$source").sha256")
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -102,7 +118,7 @@ jobs:
 
           To build from source: use Node.js 22.23.2, then run pnpm install --frozen-lockfile and pnpm run check.
           NOTES
-          extension="dist/container-windows-re-${RELEASE_TAG#v}-unsigned.zip"
+          extension="dist/container-windows-re-${RELEASE_TAG}-unsigned.zip"
           checksum="$extension.sha256"
           test -f "$extension" && test -f "$checksum"
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
@@ -138,16 +154,9 @@ jobs:
           name: container-windows-re-${{ github.sha }}
           path: dist
       - run: pnpm install --frozen-lockfile
-      - name: Check formatting
-        run: pnpm run format:check
-      - name: Lint source
-        run: pnpm run lint
-      - name: Check types
-        run: pnpm run typecheck
-      - name: Build
-        run: pnpm run build
       - name: Submit public AMO listing with review sources
         env:
+          RELEASE_TAG: ${{ github.ref_name }}
           WEB_EXT_API_KEY: ${{ secrets.WEB_EXT_API_KEY }}
           WEB_EXT_API_SECRET: ${{ secrets.WEB_EXT_API_SECRET }}
         run: |
@@ -155,12 +164,12 @@ jobs:
             echo "Configure WEB_EXT_API_KEY and WEB_EXT_API_SECRET in repository Actions secrets."
             exit 1
           fi
-          version=$(node -p "JSON.parse(require('fs').readFileSync('package.json')).version")
+          unzip -q "dist/container-windows-re-${RELEASE_TAG}-unsigned.zip" -d build/extension
           pnpm exec web-ext sign \
             --source-dir build/extension \
             --channel listed \
             --amo-metadata amo-metadata.json \
-            --upload-source-code "dist/container-windows-re-${version}-source.zip" \
+            --upload-source-code "dist/container-windows-re-${RELEASE_TAG}-source.zip" \
             --artifacts-dir build/amo \
             --approval-timeout 900000 \
             --no-input

@@ -32,7 +32,7 @@ const bytes = zipSync(entries, { level: 9 });
 const output = new URL("../../dist/", target);
 await mkdir(output, { recursive: true });
 const manifest = JSON.parse(await readFile(new URL("manifest.json", target), "utf8"));
-const name = "container-windows-re-" + manifest.version + "-unsigned.zip";
+const name = `container-windows-re-v${manifest.version}-unsigned.zip`;
 await writeFile(new URL(name, output), bytes);
 await writeFile(
   new URL(name + ".sha256", output),
