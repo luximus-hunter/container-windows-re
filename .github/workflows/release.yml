@@ -164,6 +164,7 @@ jobs:
             echo "Configure WEB_EXT_API_KEY and WEB_EXT_API_SECRET in repository Actions secrets."
             exit 1
           fi
+          mkdir -p build/extension build/amo
           unzip -q "dist/container-windows-re-${RELEASE_TAG}-unsigned.zip" -d build/extension
           pnpm exec web-ext sign \
             --source-dir build/extension \
