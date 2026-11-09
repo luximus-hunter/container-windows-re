@@ -16,6 +16,10 @@
     "check": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run build && pnpm run lint:extension && node build/tools/package.mjs",
     "lint:extension": "web-ext lint --source-dir build/extension --warnings-as-errors"
   },
+  "dependencies": {
+    "@fontsource-variable/dm-sans": "^5.3.0",
+    "@fontsource-variable/noto-serif": "^5.3.0"
+  },
   "devDependencies": {
     "@types/firefox-webext-browser": "^143.0.1",
     "@types/node": "^26.6.6",

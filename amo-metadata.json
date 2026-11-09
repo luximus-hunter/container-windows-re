@@ -5,6 +5,6 @@
   },
   "version": {
     "license": "MIT",
-    "approval_notes": "Source ZIP contains the full committed project, including src/, pnpm-lock.yaml, pnpm-workspace.yaml and build configurations. Build with Node.js 22.23.2 and pnpm 12.18.0 (corepack enable && corepack install): pnpm install --frozen-lockfile && pnpm run build. Output is build/extension/. Vite transforms TypeScript and bundles without minification. The settings UI is embedded in about:addons. HTTP/HTTPS host access is used only to read CSS display-mode and document.readyState for app-window detection; no page content or diagnostics are transmitted. Unknown windows participate in grouping. Based on Container Windows by JM; upstream MIT notice retained. Lucide icon licence included."
+    "approval_notes": "Source ZIP contains the full committed project, including src/, pnpm-lock.yaml, pnpm-workspace.yaml and build configurations. Build with Node.js 22.23.2 and pnpm 12.18.0 (corepack enable && corepack install): pnpm install --frozen-lockfile && pnpm run build. Output is build/extension/. Vite transforms TypeScript and bundles without minification. Open the settings tab from Preferences in about:addons. HTTP/HTTPS host access is used only to read CSS display-mode and document.readyState for app-window detection; no page content or diagnostics are transmitted. Unknown windows participate in grouping. Based on Container Windows by JM; upstream MIT notice retained. Lucide icon licence included."
   }
 }

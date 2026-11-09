@@ -96,14 +96,21 @@ async function act(task: () => Promise<unknown>) {
     existing.disabled = !state?.automatic;
   }
 }
-access.addEventListener("click", () => {
+access.addEventListener("click", async () => {
   // Must call request directly from a user gesture, before awaiting anything.
-  const request = browser.permissions.request(WEBSITE_ACCESS);
-  void act(async () => {
-    if (!(await request)) {
-      throw new Error("Website access was not granted; unknown windows are treated as non-app");
+  access.disabled = true;
+  try {
+    if (await browser.permissions.request(WEBSITE_ACCESS)) {
+      await refresh();
+    } else {
+      permissionStatus.textContent =
+        "Website access was declined. You can try again whenever you’re ready.";
     }
-  });
+  } catch {
+    permissionStatus.textContent = "Couldn’t update website access. Try again.";
+  } finally {
+    access.disabled = false;
+  }
 });
 automatic.addEventListener("click", () => {
   void act(() =>

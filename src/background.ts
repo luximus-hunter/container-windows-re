@@ -1,4 +1,3 @@
-import { requestStartupAccess } from "./permissions.ts";
 import { createRouter } from "./router.ts";
 import type { RouterApi, Tab, WindowInfo } from "./types.ts";
 
@@ -38,9 +37,11 @@ browser.runtime.onMessage.addListener((message, sender) => {
   }
   return undefined;
 });
-browser.runtime.onInstalled.addListener(() => {
+browser.runtime.onInstalled.addListener(({ reason }) => {
   void router.initializeContainers();
-  void requestStartupAccess().catch(console.error);
+  if (reason === "install") {
+    void browser.tabs.create({ url: browser.runtime.getURL("welcome.html") }).catch(console.error);
+  }
 });
 browser.contextualIdentities.onCreated.addListener(({ contextualIdentity }) => {
   void browser.storage.local.set({ [contextualIdentity.cookieStoreId]: true }).catch(console.error);
@@ -48,10 +49,3 @@ browser.contextualIdentities.onCreated.addListener(({ contextualIdentity }) => {
 browser.contextualIdentities.onRemoved.addListener(({ contextualIdentity }) => {
   void browser.storage.local.remove(contextualIdentity.cookieStoreId).catch(console.error);
 });
-
-// onStartup covers browser startup; the top-level check below also runs when
-// Firefox enables the extension or reloads its background script.
-browser.runtime.onStartup.addListener(() => {
-  void requestStartupAccess().catch(console.error);
-});
-void requestStartupAccess().catch(console.error);

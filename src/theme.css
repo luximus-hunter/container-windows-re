@@ -1,0 +1,382 @@
+@import "@fontsource-variable/dm-sans";
+@import "@fontsource-variable/noto-serif";
+
+/* shadcn preset b5HDcT24g4 · Lyra, Taupe, Amber, large radius */
+:root {
+  color-scheme: light dark;
+  --background: light-dark(oklch(1 0 0), oklch(0.147 0.004 49.3));
+  --foreground: light-dark(oklch(0.147 0.004 49.3), oklch(0.986 0.002 67.8));
+  --card: light-dark(oklch(1 0 0), oklch(0.214 0.009 43.1));
+  --card-foreground: var(--foreground);
+  --primary: light-dark(oklch(0.555 0.163 48.998), oklch(0.473 0.137 46.201));
+  --primary-foreground: oklch(0.987 0.022 95.277);
+  --muted: light-dark(oklch(0.96 0.002 17.2), oklch(0.268 0.011 36.5));
+  --muted-foreground: light-dark(oklch(0.547 0.021 43.1), oklch(0.714 0.014 41.2));
+  --border: light-dark(oklch(0.922 0.005 34.3), oklch(1 0 0 / 10%));
+  --input: light-dark(oklch(0.922 0.005 34.3), oklch(1 0 0 / 15%));
+  --ring: light-dark(oklch(0.714 0.014 41.2), oklch(0.547 0.021 43.1));
+  --sidebar-primary: light-dark(oklch(0.666 0.179 58.318), oklch(0.769 0.188 70.08));
+  --radius: 0.875rem;
+  --font-sans: "DM Sans Variable", sans-serif;
+  --font-heading: "Noto Serif Variable", serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: color-mix(in oklab, var(--background), var(--sidebar-primary) 5%);
+  scroll-behavior: auto;
+}
+
+body {
+  margin: 0;
+  color: var(--foreground);
+  font: 1rem/1.5 var(--font-sans);
+}
+
+h1,
+h2 {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: clamp(2rem, 6vw, 3.25rem);
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+
+h2 {
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+}
+
+p {
+  margin: 0;
+  color: var(--muted-foreground);
+}
+
+/* The generated Lyra components use rounded-none even with the large radius token. */
+button {
+  display: inline-flex;
+  height: 2rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.625rem;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: var(--background) padding-box;
+  color: var(--foreground);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1rem;
+  white-space: nowrap;
+  user-select: none;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--muted);
+}
+
+button:active {
+  translate: 0 1px;
+}
+
+button:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+button.primary {
+  border-color: transparent;
+  background: var(--primary) padding-box;
+  color: var(--primary-foreground);
+}
+
+button.primary:hover {
+  background-color: color-mix(in oklab, var(--primary) 80%, transparent);
+}
+
+@media (prefers-color-scheme: dark) {
+  button:not(.primary) {
+    border-color: var(--input);
+    background-color: color-mix(in oklab, var(--input) 30%, transparent);
+  }
+
+  button:not(.primary):hover {
+    background-color: color-mix(in oklab, var(--input) 50%, transparent);
+  }
+}
+
+:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--ring) 50%, transparent);
+  outline-offset: 2px;
+}
+
+:is(button, input[type="checkbox"]):focus-visible {
+  border-color: var(--ring);
+  outline: 1px solid color-mix(in oklab, var(--ring) 50%, transparent);
+  outline-offset: 0;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+}
+
+.card {
+  --card-spacing: 1rem;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--card-spacing);
+  overflow: hidden;
+  padding-block: var(--card-spacing);
+  border-radius: 0;
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground) 10%, transparent);
+  font-size: 0.75rem;
+  line-height: 1.625;
+}
+
+.badge {
+  display: inline-flex;
+  width: fit-content;
+  height: 1.25rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0.125rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  color: var(--foreground);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1rem;
+  white-space: nowrap;
+}
+
+.welcome {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: clamp(1rem, 5vw, 3rem);
+}
+
+.welcome-shell {
+  width: min(100%, 43rem);
+}
+
+.masthead,
+.brand {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.masthead {
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.brand {
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.brand svg,
+.access-panel svg {
+  color: light-dark(var(--primary), var(--sidebar-primary));
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.brand svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.setup {
+  --inset: clamp(1.25rem, 5vw, 2.75rem);
+  padding: var(--inset) var(--inset) 0;
+}
+
+.eyebrow {
+  margin-bottom: 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.lede {
+  max-width: 36ch;
+  margin-top: 0.875rem;
+  font-size: 1rem;
+}
+
+.access-panel {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.125rem 0.5rem;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid color-mix(in oklab, var(--border), var(--sidebar-primary) 20%);
+  border-radius: 0;
+  color: var(--card-foreground);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.access-panel,
+.permission-card {
+  background: color-mix(in oklab, var(--card), var(--sidebar-primary) 10%);
+}
+
+.access-panel svg {
+  width: 1rem;
+  height: 1rem;
+  grid-row: span 2;
+}
+
+.access-panel h2 {
+  font: inherit;
+  font-weight: 500;
+}
+
+.access-panel p {
+  line-height: 1.625;
+  text-wrap: pretty;
+}
+
+.setup-footer {
+  margin-inline: calc(-1 * var(--inset));
+  padding: var(--card-spacing) var(--inset);
+  border-top: 1px solid var(--border);
+}
+
+.feedback,
+.welcome-note {
+  font-size: 0.75rem;
+}
+
+.feedback {
+  margin-top: 0.625rem;
+}
+
+.welcome-note {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.settings {
+  max-width: 54rem;
+  margin-inline: auto;
+  padding: clamp(1rem, 4vw, 2rem);
+}
+
+.settings h1 {
+  margin-bottom: 0.75rem;
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+}
+
+.settings .card {
+  margin-top: 1rem;
+  padding-inline: var(--card-spacing);
+}
+
+#container-settings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 0.625rem;
+}
+
+#container-settings label {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem;
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+
+#container-settings label div {
+  width: 1.375rem;
+  height: 1.375rem;
+  flex: none;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+}
+
+#container-settings label span {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+
+input[type="checkbox"] {
+  display: grid;
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  place-items: center;
+  margin: 0;
+  appearance: none;
+  border: 1px solid var(--input);
+  border-radius: 0;
+  background: light-dark(transparent, color-mix(in oklab, var(--input) 30%, transparent));
+  cursor: pointer;
+}
+
+input[type="checkbox"]:checked {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+input[type="checkbox"]:checked::before {
+  width: 0.875rem;
+  height: 0.875rem;
+  background: currentColor;
+  mask: url("check.svg") center / contain no-repeat;
+  content: "";
+}
+
+@media (forced-colors: active) {
+  input[type="checkbox"] {
+    appearance: auto;
+  }
+
+  input[type="checkbox"]:checked::before {
+    content: none;
+  }
+}
+
+summary {
+  font-weight: 500;
+  cursor: pointer;
+}
+
+#result,
+#diagnostics {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

@@ -1,4 +1,5 @@
 import { detectWindow, detectTab } from "./display-mode.ts";
+import { WEBSITE_ACCESS } from "./permissions.ts";
 import type { Tab, WindowInfo, RouterApi, PendingTab, Activity, Batch, Outcome } from "./types.ts";
 
 // Keep legacy session marker names so updating does not replay already-seen tabs.
@@ -177,7 +178,7 @@ export function createRouter(api: RouterApi, report = console.error) {
     await ready;
     const window = await api.windows.get(id, { populate: true });
     const mode = await detectWindow(api, window);
-    const access = await api.permissions.contains({ origins: ["http://*/*", "https://*/*"] });
+    const access = await api.permissions.contains(WEBSITE_ACCESS);
     const [settings, containers] = await Promise.all([
       api.storage.local.get(null),
       api.contextualIdentities.query({}),

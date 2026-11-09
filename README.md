@@ -24,9 +24,9 @@ In Firefox:
 
 1. Open `about:debugging#/runtime/this-firefox`.
 2. Select **Load Temporary Add-on** and choose `build/extension/manifest.json`.
-3. Accept website access in Firefox’s installation prompt. If access is missing, the extension opens its preferences in `about:addons`; select **Allow website access** there.
+3. Select **Allow website access** in the welcome tab, then approve the Firefox prompt to enable app window detection.
 4. Choose which containers should group in the **Containers** section.
-5. Reopen settings through `about:addons` → **Container Windows RE** → **Preferences**. The extension has no toolbar action.
+5. Reopen the settings tab through `about:addons` → **Container Windows RE** → **Preferences**. The extension has no toolbar action.
 
 Automatic grouping and newly discovered containers are enabled by default. Temporary add-ons must be loaded again after Firefox restarts. Installation, updates, removal and signing instructions are below.
 
@@ -76,17 +76,17 @@ Any positive app result excludes the whole window. Loading or discarded probes c
 
 **Unknown windows participate in grouping.** An app whose display mode cannot be read may therefore have tabs moved into or out of it. Website access improves detection; it does not guarantee exclusion of every app.
 
-| Permission             | Purpose                                                    |
-| ---------------------- | ---------------------------------------------------------- |
-| `contextualIdentities` | Read containers and react to container creation/removal    |
-| `sessions`             | Mark seen tabs and protect initial-window tabs             |
-| `storage`              | Save preferences, pauses and remembered container homes    |
-| `scripting`            | Run the display-mode query                                 |
-| HTTP/HTTPS host access | Allow the query on websites; requested during installation |
+| Permission                      | Purpose                                                                 |
+| ------------------------------- | ----------------------------------------------------------------------- |
+| `contextualIdentities`          | Read containers and react to container creation/removal                 |
+| `sessions`                      | Mark seen tabs and protect initial-window tabs                          |
+| `storage`                       | Save preferences, pauses and remembered container homes                 |
+| `scripting`                     | Run the display-mode query                                              |
+| Optional HTTP/HTTPS host access | Allow the query on websites; requested from the welcome tab or settings |
 
-The implementation does not read page content, send network requests or transmit diagnostics. No native helper is required. HTTP/HTTPS access is declared in `host_permissions`, so Firefox includes it in the normal installation prompt. On installation, re-enabling the extension, browser startup, temporary reload or background-script initialization, the extension immediately checks access and opens its embedded `about:addons` preferences if access is missing. If access has already been granted, no setup page opens. Firefox still lets users revoke website access; preferences remain available from `about:addons`.
+The implementation does not read page content, send network requests or transmit diagnostics. No native helper is required. HTTP/HTTPS access is declared in `optional_host_permissions`. A fresh installation opens a welcome tab with a button to request access. You can grant access later in the extension's preferences or revoke it from its permissions in `about:addons`.
 
-Firefox requires [`permissions.request()` to run from a user action](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/permissions/request), so a background script cannot directly show a native runtime permission prompt. The settings page's **Allow website access** button supplies the required click. Host access is never silently granted.
+Firefox requires [`permissions.request()` to run from a user action](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/permissions/request). Select **Allow website access** to open the Firefox permission prompt.
 
 ## Session behavior and limits
 
@@ -148,7 +148,10 @@ src/
   common.ts            Shared container and storage helpers
   types.ts             Browser snapshots and routing/state types
   settings-controls.ts Grouping controls, access request and diagnostics
-  permissions.ts       Shared website-access and startup setup flow
+  permissions.ts       Shared website-access declaration
+  welcome.ts / welcome.html
+                       First-run setup and website access request
+  theme.css            Shared shadcn preset styling
   options.ts / options.html
                        Settings page and per-container preferences
   manifest.json        Source Firefox manifest
@@ -181,7 +184,7 @@ Release Firefox requires a signed extension. Keep signature enforcement enabled.
 4. If Mozilla requests source, provide `src/`, `scripts/`, build and formatter/linter configurations, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, README and LICENCE. The TypeScript source is transformed and bundled; include the Node version and `pnpm install --frozen-lockfile` / `pnpm run build` instructions. Exclude `node_modules`, generated `build`/`dist` and original `META-INF` signatures.
 5. Address review requests and download the signed XPI. Local validation does not guarantee approval.
 6. Remove the temporary copy, then open `about:addons` → gear menu → **Install Add-on From File…** and select the signed XPI.
-7. Grant website access from the startup settings page if requested.
+7. Grant website access from the welcome tab to enable app window detection.
 
 For later releases, increment both `src/manifest.json` and `package.json` versions, run `pnpm install --lockfile-only` and `pnpm run check`, then submit the new ZIP to the same listing. Install the signed update from file. Automatic self-distribution updates are not configured.
 

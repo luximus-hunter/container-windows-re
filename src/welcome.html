@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Welcome to Container Windows RE</title>
+    <link rel="icon" type="image/svg+xml" href="app-window.svg" />
+    <link rel="stylesheet" href="theme.css" />
+    <script type="module" src="welcome.ts"></script>
+  </head>
+  <body class="welcome">
+    <main class="welcome-shell">
+      <header class="masthead">
+        <div class="brand">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <rect x="2" y="4" width="20" height="16" rx="2" />
+            <path d="M2 8h20M6 4v4M10 4v4" />
+          </svg>
+          <span>Container Windows RE</span>
+        </div>
+        <span class="badge">Firefox add-on</span>
+      </header>
+
+      <section class="card setup" aria-labelledby="welcome-heading">
+        <header>
+          <p class="eyebrow">First-run setup</p>
+          <h1 id="welcome-heading">Give your containers their own windows</h1>
+          <p class="lede">
+            Group tabs by Firefox container and keep detected web app windows separate.
+          </p>
+        </header>
+        <div class="access-panel">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z" />
+            <path d="m9 12 2 2 4-4" />
+          </svg>
+          <h2>Website access</h2>
+          <p>
+            Firefox doesn’t tell extensions whether a page is open in an app window or a regular
+            browser tab. With permission to access HTTP and HTTPS sites, this extension can check
+            each page’s display mode and loading state to detect app windows. It never collects or
+            sends page content.
+          </p>
+        </div>
+        <footer class="setup-footer">
+          <div class="actions">
+            <button id="access" class="primary" type="button" disabled>Allow website access</button>
+            <button id="settings" type="button">Open settings</button>
+          </div>
+          <p id="permission-status" class="feedback" role="status">Checking website access…</p>
+        </footer>
+      </section>
+      <p class="welcome-note">
+        You can manage website access anytime in the add-on’s Firefox settings.
+      </p>
+    </main>
+  </body>
+</html>

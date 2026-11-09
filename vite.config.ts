@@ -28,6 +28,12 @@ export default defineConfig({
           ...["LICENCE", "LUCIDE-LICENSE"].map((file) =>
             copyFile(new URL(`./${file}`, import.meta.url), new URL(file, outputUrl)),
           ),
+          ...["dm-sans", "noto-serif"].map((font) =>
+            copyFile(
+              new URL(`./node_modules/@fontsource-variable/${font}/LICENSE`, import.meta.url),
+              new URL(`${font}-LICENSE.txt`, outputUrl),
+            ),
+          ),
         ]);
         const files = await readdir(output);
         if (files.includes("META-INF")) {
@@ -46,6 +52,7 @@ export default defineConfig({
     rolldownOptions: {
       input: {
         options: source("options.html"),
+        welcome: source("welcome.html"),
         background: source("background.ts"),
       },
       output: {
